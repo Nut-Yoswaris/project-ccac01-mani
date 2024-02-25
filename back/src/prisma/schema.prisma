@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UerType {
+  ADMIN
+  USER
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  email              String?
+  username           String               @unique @db.VarChar(30)
+  password           String               @db.VarChar(72)
+  description        String?             @db.VarChar(150)
+  userType UerType @default(USER)
+  brithday           String?
+  review_restaurants Review_restaurants[]
+  review_Images      Review_Image[]
+}
+
+model Review_restaurants {
+  id           Int         @id @default(autoincrement())
+  comment      String      @db.VarChar(200)
+  Rating       String?      @db.VarChar(1)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId       Int         @map("user_id")
+  restaurants  Restaurants @relation(fields: [restaurantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  restaurantId Int         @map("restaurant_id")
+}
+
+model Review_Image {
+  id           Int         @id @default(autoincrement())
+  image_url    String      @db.VarChar(100)
+  description  String?      @db.VarChar(200)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId       Int         @map("user_id")
+  restaurants  Restaurants @relation(fields: [restaurantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  restaurantId Int         @map("restaurant_id")
+}
+
+model Restaurants {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(150)
+  type               Type                 @default(RESTAURANTS)
+  description        String?               @db.VarChar(150)
+  tal                String?               @db.VarChar(10)
+  dayOpen            String?               @db.VarChar(20)
+  dayClose           String?               @db.VarChar(20)
+  timeOpen           String?               @db.VarChar(20)
+  restaurant_address String?               @db.VarChar(200)
+  review_restaurants Review_restaurants[]
+  review_Images      Review_Image[]
+  image_restaurants  Image_restaurants[]
+}
+
+model Image_restaurants {
+  id           Int         @id @default(autoincrement())
+  image_url    String      @db.VarChar(100)
+  description  String      @db.VarChar(300)
+  restaurants  Restaurants @relation(fields: [restaurantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  restaurantId Int         @map("restaurant_id")
+}
+
+model Recommend_restaurants {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(50) @map("name_restaurant")
+  rating String @db.VarChar(1) @map("rating_restaurant")
+}
+
+enum Type {
+  CAFE
+  RESTAURANTS
+  CHECKIN
+}
